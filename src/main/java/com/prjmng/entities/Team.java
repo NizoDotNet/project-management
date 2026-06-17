@@ -1,9 +1,6 @@
 package com.prjmng.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
@@ -12,10 +9,12 @@ import java.util.UUID;
 @Table(name="teams", schema = "project_management")
 public class Team extends AuditableEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(targetEntity = Organization.class)
-    private UUID orgId;
+    @ManyToOne
+    @JoinColumn(name="org_id")
+    private Organization organization;
     @Length(min=2, max=30)
     private String name;
 }

@@ -1,9 +1,7 @@
 package com.prjmng.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import com.prjmng.entities.enums.TeamMemberRole;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.UUID;
@@ -13,11 +11,17 @@ import java.util.UUID;
 @Table(name="team_members", schema = "project_management")
 public class TeamMember {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(targetEntity = Team.class)
-    private UUID teamId;
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
 
-    @ManyToOne(targetEntity = User.class)
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    private TeamMemberRole Role;
 }
