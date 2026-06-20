@@ -2,11 +2,11 @@ package com.prjmng.entities;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public abstract class AuditableEntity {
-    public Date createdAt;
-    public Date updatedAt;
+    public LocalDateTime createdAt;
+    public LocalDateTime updatedAt;
 
 }
