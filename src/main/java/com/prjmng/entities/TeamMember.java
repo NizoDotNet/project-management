@@ -15,14 +15,14 @@ public class TeamMember {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
+    @JoinColumn(name = "team_id",insertable = false, updatable = false)
     private Team team;
 
     @Column(name = "team_id")
     private UUID teamId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id")
+    @JoinColumn(name="user_id",insertable = false, updatable = false)
     private User user;
 
     @Column(name = "user_id")

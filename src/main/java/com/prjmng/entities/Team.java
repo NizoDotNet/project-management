@@ -15,7 +15,7 @@ public class Team extends AuditableEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="org_id")
+    @JoinColumn(name="org_id",insertable = false, updatable = false)
     private Organization organization;
 
     @Column(name="org_id")
