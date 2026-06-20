@@ -14,13 +14,19 @@ public class TeamMember {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @ManyToOne
+    @Column(name = "team_id")
+    private UUID teamId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private User user;
+
+    @Column(name = "user_id")
+    private UUID userId;
 
     @Enumerated(EnumType.STRING)
     private TeamMemberRole Role;
