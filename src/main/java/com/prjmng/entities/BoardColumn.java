@@ -1,10 +1,7 @@
 package com.prjmng.entities;
 
-import com.prjmng.entities.enums.SprintStatus;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
