@@ -25,10 +25,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_URLS)
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
+                        .requestMatchers(PUBLIC_URLS).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter())));
 

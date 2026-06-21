@@ -2,22 +2,23 @@ package com.prjmng.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
+@AllArgsConstructor
 @Entity
 @Table(name = "users", schema = "project_management")
-@NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
 public class User extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String keycloak_id;
+    private String keycloakId;
     @Email
     private String email;
     @Length(min=2, max=20)
