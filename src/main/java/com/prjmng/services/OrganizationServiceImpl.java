@@ -3,9 +3,16 @@ package com.prjmng.services;
 import com.prjmng.entities.Organization;
 import com.prjmng.entities.User;
 import com.prjmng.repositories.OrganizationRepository;
+import com.prjmng.services.specifications.OrganizationSpecifications;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
+import com.prjmng.shared.DTOs.organization.OrganizationResponse;
 import com.prjmng.shared.DTOs.users.UserResponse;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -17,17 +24,54 @@ public class OrganizationServiceImpl {
     private final OrganizationRepository organizationRepository;
     private final UserServiceImpl userService;
 
-    public void createOrganization(CreateOrganizationRequest createOrganizationRequest, Jwt jwt) {
-        User userResponse = userService.getOrCreateUser(jwt);
+    public OrganizationResponse createOrganization(CreateOrganizationRequest createOrganizationRequest, Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
 
         Organization organization = Organization
                 .builder()
                 .name(createOrganizationRequest.getName())
                 .slug(generateSlug(createOrganizationRequest.getName()))
-                .ownerId(userResponse.getId())
+                .ownerId(user.getId())
                 .build();
 
-        organizationRepository.save(organization);
+        organization = organizationRepository.save(organization);
+
+        OrganizationResponse response = mapToOrganizationResponse(organization, user);
+
+        return response;
+    }
+
+    public OrganizationResponse getOrganization(UUID id) {
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                    String.format("Organization with %s id was not found", id)
+                )
+            );
+
+        OrganizationResponse response = mapToOrganizationResponse(organization, organization.getOwner());
+        return response;
+    }
+
+
+    public OrganizationResponse getOrganization(String slug) {
+        Organization organization = organizationRepository.findBySlug(slug)
+                .orElseThrow(() -> new NotFoundException(
+                                String.format("Organization with %s slug was not found", slug)
+                        )
+                );
+
+        OrganizationResponse response = mapToOrganizationResponse(organization, organization.getOwner());
+        return response;
+    }
+
+
+
+    public Page<OrganizationResponse> getOrganizationsByPagination(String slug, UUID ownerId, Pageable pageable) {
+        Specification<Organization> specification = OrganizationSpecifications.hasSlug(slug)
+                .and(OrganizationSpecifications.hasOwner(ownerId));
+        var organizations = organizationRepository.findAll(specification, pageable);
+
+        return organizations.map(organization -> mapToOrganizationResponse(organization, organization.getOwner()));
     }
 
     private String generateSlug(String organizationName) {
@@ -39,9 +83,19 @@ public class OrganizationServiceImpl {
                 .replaceAll("-+", "-");
 
         if(organizationRepository.existsBySlug(slug)) {
-            slug += String.format("-$s", UUID.randomUUID().toString());
+            slug += "-" + UUID.randomUUID().toString().substring(0, 8);
         }
 
         return slug;
+    }
+
+    private static @NonNull OrganizationResponse mapToOrganizationResponse(Organization organization, User organization1) {
+        return new OrganizationResponse(
+                organization.getId(),
+                organization.getName(),
+                organization.getSlug(),
+                new UserResponse(organization1.getId(), organization1.getKeycloakId(), organization1.getEmail(), organization1.getFirstName(), organization1.getLastName()),
+                organization1.getId()
+        );
     }
 }
