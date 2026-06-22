@@ -2,9 +2,9 @@ package com.prjmng.services;
 
 import com.prjmng.entities.User;
 import com.prjmng.repositories.UserRepository;
-import com.prjmng.shared.DTOs.users.UserResponse;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -16,18 +16,14 @@ public class UserServiceImpl {
         this.userRepository = userRepository;
     }
 
-    public UserResponse getOrCreateUser(Jwt jwt) {
+    @Transactional
+    public User getOrCreateUser(Jwt jwt) {
         String keycloakId = jwt.getSubject();
 
         Optional<User> userFromDatabase = userRepository.findByKeycloakId(keycloakId);
 
         if(userFromDatabase.isPresent()) {
-            return new UserResponse(
-                    userFromDatabase.get().getId(),
-                    userFromDatabase.get().getKeycloakId(),
-                    userFromDatabase.get().getEmail(),
-                    userFromDatabase.get().getFirstName(),
-                    userFromDatabase.get().getLastName());
+            return userFromDatabase.get();
         }
 
         User user = User.builder()
@@ -37,13 +33,8 @@ public class UserServiceImpl {
                 .lastName(jwt.getClaimAsString("family_name"))
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        return new UserResponse(
-                user.getId(),
-                user.getKeycloakId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName());
+        return savedUser;
     }
 }

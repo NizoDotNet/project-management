@@ -1,5 +1,6 @@
 package com.prjmng.controllers;
 
+import com.prjmng.entities.User;
 import com.prjmng.services.UserServiceImpl;
 import com.prjmng.shared.DTOs.users.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,14 @@ public class HomeController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assert auth != null;
 
-        UserResponse userResponse = userService.getOrCreateUser(jwt);
+        User user = userService.getOrCreateUser(jwt);
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getKeycloakId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName()
+        );
         return ResponseEntity.ok(userResponse);
     }
 

@@ -1,6 +1,7 @@
 package com.prjmng.services;
 
 import com.prjmng.entities.Organization;
+import com.prjmng.entities.User;
 import com.prjmng.repositories.OrganizationRepository;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.users.UserResponse;
@@ -17,7 +18,7 @@ public class OrganizationServiceImpl {
     private final UserServiceImpl userService;
 
     public void createOrganization(CreateOrganizationRequest createOrganizationRequest, Jwt jwt) {
-        UserResponse userResponse = userService.getOrCreateUser(jwt);
+        User userResponse = userService.getOrCreateUser(jwt);
 
         Organization organization = Organization
                 .builder()
