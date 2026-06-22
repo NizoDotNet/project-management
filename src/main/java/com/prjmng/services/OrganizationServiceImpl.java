@@ -66,7 +66,7 @@ public class OrganizationServiceImpl {
 
 
 
-    public Page<OrganizationResponse> getOrganizationsByPagination(String slug, UUID ownerId, Pageable pageable) {
+    public Page<OrganizationResponse> getOrganizationsWithPagination(String slug, UUID ownerId, Pageable pageable) {
         Specification<Organization> specification = OrganizationSpecifications.hasSlug(slug)
                 .and(OrganizationSpecifications.hasOwner(ownerId));
         var organizations = organizationRepository.findAll(specification, pageable);

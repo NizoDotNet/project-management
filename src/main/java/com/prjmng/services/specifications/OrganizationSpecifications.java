@@ -8,7 +8,7 @@ import java.util.UUID;
 public class OrganizationSpecifications {
     public static Specification<Organization> hasSlug(String slug) {
         return (root, query, cb) ->
-            slug.isBlank() || slug == null ?
+        slug == null || slug.isEmpty() ?
                     cb.conjunction() :
                     cb.like(root.get("slug"), "%" + slug.toLowerCase() + "%");
     }
