@@ -89,13 +89,13 @@ public class OrganizationServiceImpl {
         return slug;
     }
 
-    private static @NonNull OrganizationResponse mapToOrganizationResponse(Organization organization, User organization1) {
+    private static @NonNull OrganizationResponse mapToOrganizationResponse(Organization organization, User owner) {
         return new OrganizationResponse(
                 organization.getId(),
                 organization.getName(),
                 organization.getSlug(),
-                new UserResponse(organization1.getId(), organization1.getKeycloakId(), organization1.getEmail(), organization1.getFirstName(), organization1.getLastName()),
-                organization1.getId()
+                new UserResponse(owner.getId(), owner.getKeycloakId(), owner.getEmail(), owner.getFirstName(), owner.getLastName()),
+                owner.getId()
         );
     }
 }
