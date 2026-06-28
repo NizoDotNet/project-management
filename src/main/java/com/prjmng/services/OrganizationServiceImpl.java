@@ -6,6 +6,7 @@ import com.prjmng.repositories.OrganizationRepository;
 import com.prjmng.services.specifications.OrganizationSpecifications;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
+import com.prjmng.shared.DTOs.organization.UpdateOrganizationRequest;
 import com.prjmng.shared.DTOs.users.UserResponse;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,24 @@ public class OrganizationServiceImpl {
                 .ownerId(user.getId())
                 .build();
 
+        organization = organizationRepository.save(organization);
+
+        OrganizationResponse response = mapToOrganizationResponse(organization, user);
+
+        return response;
+    }
+
+    public OrganizationResponse updateOrganization(UUID organizationId, UpdateOrganizationRequest organizationRequest, Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+
+        Organization organization = organizationRepository.findByIdAndOwnerId(organizationId, user.getId())
+                .orElseThrow(() -> new NotFoundException(
+                                String.format("Organization with %s id was not found", organizationId)
+                        )
+                );
+
+        organization.setName(organizationRequest.getName());
+        organization.setSlug(generateSlug(organizationRequest.getName()));
         organization = organizationRepository.save(organization);
 
         OrganizationResponse response = mapToOrganizationResponse(organization, user);
@@ -73,6 +92,7 @@ public class OrganizationServiceImpl {
 
         return organizations.map(organization -> mapToOrganizationResponse(organization, organization.getOwner()));
     }
+
 
     private String generateSlug(String organizationName) {
         String slug = organizationName

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 public interface OrganizationRepository extends  JpaRepository<Organization, UUID>, JpaSpecificationExecutor<Organization> {
     Optional<Organization> findBySlug(String slug);
+    Optional<Organization> findByIdAndOwnerId(UUID id, UUID ownerId);
     boolean existsBySlug(String slug);
 }
 

@@ -3,6 +3,7 @@ package com.prjmng.controllers;
 import com.prjmng.services.OrganizationServiceImpl;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
+import com.prjmng.shared.DTOs.organization.UpdateOrganizationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,13 @@ public class OrganizationController {
     @PostMapping
     public ResponseEntity<OrganizationResponse> createOrganization(@Valid CreateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {
         OrganizationResponse response = organizationService.createOrganization(request, jwt);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<OrganizationResponse> updateOrganization(@PathVariable UUID id, @Valid UpdateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {
+        OrganizationResponse response = organizationService.updateOrganization(id, request, jwt);
 
         return ResponseEntity.ok(response);
     }

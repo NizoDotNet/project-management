@@ -27,5 +27,6 @@ public class Organization extends AuditableEntity {
 
     @Column(name="owner_id")
     private UUID ownerId;
+
     private void setId() {}
 }
