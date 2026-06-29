@@ -2,10 +2,7 @@ package com.prjmng.entities;
 
 import com.prjmng.entities.enums.TeamMemberRole;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -13,6 +10,8 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="team_members", schema = "project_management")
 public class TeamMember {
     @Id

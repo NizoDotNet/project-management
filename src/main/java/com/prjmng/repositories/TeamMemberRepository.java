@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface TeamMemberRepository extends  JpaRepository<TeamMember, UUID> {
-
+    boolean existsByUserIdAndTeamId(UUID userId, UUID teamId);
 }
 
 
