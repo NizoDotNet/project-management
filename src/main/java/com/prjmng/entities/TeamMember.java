@@ -20,11 +20,9 @@ public class TeamMember {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id",insertable = false, updatable = false)
+    @JoinColumn(name = "team_id")
     private Team team;
 
-    @Column(name = "team_id")
-    private UUID teamId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id",insertable = false, updatable = false)

@@ -35,10 +35,9 @@ public class TeamService {
         Organization organization = organizationRepository.findByIdAndOwnerId(createTeamRequest.getOrgId(), user.getId())
                 .orElseThrow(() -> new RuntimeException("User is not owner and cannot create team in this organization"));
 
-        Team team = Team.builder()
-                .orgId(createTeamRequest.getOrgId())
-                .name(createTeamRequest.getName())
-                .build();
+        Team team = new Team();
+        team.setOrgId(createTeamRequest.getOrgId());
+        team.setName(createTeamRequest.getName());
 
         TeamMember member = TeamMember
                 .builder()
