@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "users", schema = "project_management")

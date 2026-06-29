@@ -35,6 +35,12 @@ public class OrganizationController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("{id}")
+    public void updateOrganization(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+        organizationService.delete(id, jwt);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<OrganizationResponse> getOrganizationById(@PathVariable UUID id) {
         OrganizationResponse response = organizationService.getOrganization(id);

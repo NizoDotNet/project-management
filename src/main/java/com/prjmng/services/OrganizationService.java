@@ -109,6 +109,18 @@ public class OrganizationService {
         return slug;
     }
 
+    public void delete(UUID id, Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+
+        Organization organization = organizationRepository.findByIdAndOwnerId(id, user.getId())
+                .orElseThrow(() -> new NotFoundException(
+                                String.format("Organization with %s id was not found", id)
+                        )
+                );
+
+        organizationRepository.delete(organization);
+    }
+
     private static @NonNull OrganizationResponse mapToOrganizationResponse(Organization organization, User owner) {
         return new OrganizationResponse(
                 organization.getId(),
