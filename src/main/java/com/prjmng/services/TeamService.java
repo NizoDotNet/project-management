@@ -8,6 +8,7 @@ import com.prjmng.entities.enums.TeamMemberRole;
 import com.prjmng.repositories.OrganizationRepository;
 import com.prjmng.repositories.TeamMemberRepository;
 import com.prjmng.repositories.TeamRepository;
+import com.prjmng.repositories.UserRepository;
 import com.prjmng.services.specifications.TeamSpecifications;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
 import com.prjmng.shared.DTOs.teams.CreateTeamMemberRequest;
@@ -25,7 +26,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,12 +33,14 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final OrganizationRepository organizationRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
 
-    public TeamService(TeamRepository teamRepository, TeamMemberRepository teamMemberRepository, OrganizationRepository organizationRepository, UserService userService) {
+    public TeamService(TeamRepository teamRepository, TeamMemberRepository teamMemberRepository, OrganizationRepository organizationRepository, UserRepository userRepository, UserService userService) {
         this.teamRepository = teamRepository;
         this.teamMemberRepository = teamMemberRepository;
         this.organizationRepository = organizationRepository;
+        this.userRepository = userRepository;
         this.userService = userService;
     }
 
@@ -85,20 +87,38 @@ public class TeamService {
         if(isAlreadyMember) {
             throw new RuntimeException("User already is member");
         }
+
+        Team team = teamRepository.findById(id).orElseThrow(() -> new NotFoundException("Team with " + id + " id was not found"));
+        User user = userRepository.findById(request.getUserId()).orElseThrow(() -> new NotFoundException("Team with " + id + " id was not found"));
+
         TeamMember member = TeamMember
                 .builder()
                 .userId(request.getUserId())
+                .team(team)
                 .Role(request.getRole())
                 .build();
+
         member = teamMemberRepository.save(member);
 
-        return new TeamMemberResponse(member.getId(), new UserResponse(
-                member.getUser().getId(),
-                member.getUser().getKeycloakId(),
-                member.getUser().getEmail(),
-                member.getUser().getFirstName(),
-                member.getUser().getLastName()),member.getRole());
+        return mapToResponse(member, user);
     }
+
+    public List<TeamMemberResponse> getTeamMembers(UUID teamId) {
+        return teamMemberRepository.findAllByTeamId(teamId).stream()
+                .map(c -> mapToResponse(c, c.getUser()))
+                .toList();
+    }
+
+    private static @NonNull TeamMemberResponse mapToResponse(TeamMember member, User user) {
+        return new TeamMemberResponse(member.getId(), new UserResponse(
+                user.getId(),
+                user.getKeycloakId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName()),
+                member.getRole());
+    }
+
     private static @NonNull TeamResponse mapToResponse(Team team, Organization organization) {
         return new TeamResponse(team.getId(),
                 new OrganizationResponse(organization.getId(),

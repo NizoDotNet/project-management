@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,7 +31,7 @@ public class TeamController {
 
     @GetMapping
     public ResponseEntity<Page<TeamResponse>> get(
-            @RequestParam(defaultValue = "1", required = true) int page,
+            @RequestParam(defaultValue = "0", required = true) int page,
             @RequestParam(defaultValue = "10", required = true) int pageSize,
             @RequestParam(required = false) UUID orgId,
             @RequestParam(required = false) String name) {
@@ -44,9 +45,16 @@ public class TeamController {
         return ResponseEntity.ok(team);
     }
 
+    @GetMapping("/{id}/members")
+    public ResponseEntity<List<TeamMemberResponse>> getMembers(@PathVariable UUID id) {
+        List<TeamMemberResponse> response = teamService.getTeamMembers(id);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{id}/members")
     public ResponseEntity<TeamMemberResponse> addMember(@PathVariable UUID id, @Valid CreateTeamMemberRequest request) {
         TeamMemberResponse response = teamService.addMember(id, request);
         return ResponseEntity.ok(response);
     }
 }
+

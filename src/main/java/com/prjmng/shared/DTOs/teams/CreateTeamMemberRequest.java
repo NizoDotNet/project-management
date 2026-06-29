@@ -15,8 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateTeamMemberRequest {
-
-    @NotEmpty
     @NotNull
     private UUID userId;
     private TeamMemberRole role;

@@ -2,6 +2,10 @@ package com.prjmng.services;
 
 import com.prjmng.entities.User;
 import com.prjmng.repositories.UserRepository;
+import com.prjmng.shared.DTOs.users.UserResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,5 +40,9 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return savedUser;
+    }
+
+    public Page<UserResponse> getAllWithPagination(PageRequest pageRequest) {
+        return userRepository.findAll(pageRequest).map(u -> new UserResponse(u.getId(), u.getKeycloakId(), u.getEmail(), u.getFirstName(), u.getLastName()));
     }
 }

@@ -54,7 +54,7 @@ public class OrganizationController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<OrganizationResponse>> getOrganizationsWithPagination(@RequestParam(name = "page", required = true, defaultValue = "1") int page,
+    public ResponseEntity<Page<OrganizationResponse>> getOrganizationsWithPagination(@RequestParam(name = "page", required = true, defaultValue = "0") int page,
                                                                                   @RequestParam(name = "pageSize", required = true, defaultValue = "1") int pageSize,
                                                                                   @RequestParam(name = "slug", required = false) String slug,
                                                                                   @RequestParam(name = "ownerId", required = false) UUID ownerId) {
