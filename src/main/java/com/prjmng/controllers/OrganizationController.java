@@ -1,6 +1,6 @@
 package com.prjmng.controllers;
 
-import com.prjmng.services.OrganizationServiceImpl;
+import com.prjmng.services.OrganizationService;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
 import com.prjmng.shared.DTOs.organization.UpdateOrganizationRequest;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequestMapping("/api/organizations")
 @RequiredArgsConstructor
 public class OrganizationController {
-    private final OrganizationServiceImpl organizationService;
+    private final OrganizationService organizationService;
 
     @PostMapping
     public ResponseEntity<OrganizationResponse> createOrganization(@Valid CreateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {

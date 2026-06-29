@@ -1,7 +1,7 @@
 package com.prjmng.controllers;
 
 import com.prjmng.entities.User;
-import com.prjmng.services.UserServiceImpl;
+import com.prjmng.services.UserService;
 import com.prjmng.shared.DTOs.users.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("public/api")
 @RequiredArgsConstructor
 public class HomeController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @GetMapping("/")
     public String Ping() {

@@ -1,13 +1,19 @@
 package com.prjmng.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
 @Table(name="teams", schema = "project_management")
 public class Team extends AuditableEntity {
     @Id
@@ -23,4 +29,16 @@ public class Team extends AuditableEntity {
 
     @Length(min=2, max=30)
     private String name;
+
+    @OneToMany(
+        mappedBy = "team",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<TeamMember> members = new ArrayList<>();
+
+    public void addMember(TeamMember member) {
+        members.add(member);
+        member.setTeamId(this.id);
+    }
 }

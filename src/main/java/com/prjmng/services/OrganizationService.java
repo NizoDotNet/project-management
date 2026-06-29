@@ -21,9 +21,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class OrganizationServiceImpl {
+public class OrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     public OrganizationResponse createOrganization(CreateOrganizationRequest createOrganizationRequest, Jwt jwt) {
         User user = userService.getOrCreateUser(jwt);
