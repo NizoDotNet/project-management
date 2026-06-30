@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UUID> {
-    @EntityGraph(attributePaths = {"organization", "owner"})
+    @EntityGraph(attributePaths = {"project.organization", "project.owner"})
     @Query("SELECT pm.project FROM ProjectMember pm WHERE pm.user.id = :userId AND pm.project.organization.id = :orgId")
     Page<Project> findAllProjectsByUserIdAndOrganizationId(@Param("userId") UUID userId, @Param("orgId") UUID orgId, Pageable pageable);
 

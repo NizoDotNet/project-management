@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -60,6 +61,7 @@ public class ProjectService {
                 .description(createProjectRequest.getDescription())
                 .status(ProjectStatus.PLANNING)
                 .build();
+        project.setMembers(new ArrayList<>());
 
         ProjectMember projectMember = ProjectMember
                 .builder()
