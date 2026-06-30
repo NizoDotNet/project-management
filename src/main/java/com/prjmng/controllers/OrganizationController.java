@@ -25,7 +25,7 @@ public class OrganizationController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<OrganizationResponse> createOrganization(@Valid CreateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<OrganizationResponse> createOrganization(@Valid @RequestBody CreateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {
         User user = userService.getOrCreateUser(jwt);
         OrganizationResponse response = organizationService.createOrganization(request, user.getId());
 

@@ -27,14 +27,14 @@ public class TeamController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<TeamResponse> create(@Valid CreateTeamRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TeamResponse> create(@Valid @RequestBody CreateTeamRequest request, @AuthenticationPrincipal Jwt jwt) {
         User user = userService.getOrCreateUser(jwt);
         TeamResponse teamResponse = teamService.createTeam(request, user.getId());
         return ResponseEntity.ok(teamResponse);
     }
 
     @DeleteMapping("{id}")
-    public void delete(UUID id, @AuthenticationPrincipal Jwt jwt) {
+    public void delete(@PathVariable  UUID id, @AuthenticationPrincipal Jwt jwt) {
         User user = userService.getOrCreateUser(jwt);
         teamService.deleteTeam(id, user.getId());
     }
@@ -65,7 +65,7 @@ public class TeamController {
     }
 
     @PostMapping("/{id}/members")
-    public ResponseEntity<TeamMemberResponse> addMember(@PathVariable UUID id, @Valid CreateTeamMemberRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TeamMemberResponse> addMember(@PathVariable UUID id, @Valid @RequestBody  CreateTeamMemberRequest request, @AuthenticationPrincipal Jwt jwt) {
         User user = userService.getOrCreateUser(jwt);
 
         TeamMemberResponse response = teamService.addMember(id, request);

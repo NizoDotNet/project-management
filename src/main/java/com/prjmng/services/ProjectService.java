@@ -7,16 +7,20 @@ import com.prjmng.entities.User;
 import com.prjmng.entities.enums.ProjectMemberRole;
 import com.prjmng.entities.enums.ProjectStatus;
 import com.prjmng.repositories.OrganizationRepository;
+import com.prjmng.repositories.ProjectMemberRepository;
 import com.prjmng.repositories.ProjectRepository;
 import com.prjmng.repositories.UserRepository;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
 import com.prjmng.shared.DTOs.projects.CreateProjectRequest;
 import com.prjmng.shared.DTOs.projects.ProjectResponse;
+import com.prjmng.shared.DTOs.projects.UpdateProjectStatusRequest;
 import com.prjmng.shared.DTOs.users.UserResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
 
@@ -75,6 +80,37 @@ public class ProjectService {
                         )
                 );
         projectRepository.delete(project);
+
+    }
+
+    public Page<ProjectResponse> getAllWithPagination(PageRequest pageRequest, UUID orgId, UUID userId) {
+        Page<Project> projects = projectMemberRepository.findAllProjectsByUserIdAndOrganizationId(userId, orgId, pageRequest);
+        return projects.map(p -> mapToResponse(p));
+    }
+
+    public ProjectResponse getById(UUID id, UUID userId) {
+        ProjectMember projectMember = projectMemberRepository.findByProjectIdAndUserId(id, userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Project member with %s id was not found", id)
+                )
+        );
+
+        return mapToResponse(projectMember.getProject());
+    }
+
+    public void updateStatus(UUID id, UUID userId, UpdateProjectStatusRequest request) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                                String.format("Project with %s id was not found", id)
+                        )
+                );
+
+        if(!project.getOwner().getId().equals(userId)) {
+            throw new RuntimeException("User with id " + userId + " is not project owner. He cannot update status");
+        }
+
+        project.setStatus(request.getStatus());
+        projectRepository.save(project);
 
     }
 
