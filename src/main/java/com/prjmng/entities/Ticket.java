@@ -31,7 +31,7 @@ public class Ticket extends AuditableEntity {
     private BoardColumn column;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sprint_id")               // nullable — ticket may not be in a sprint
+    @JoinColumn(name = "sprint_id")
     private Sprint sprint;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,7 +39,7 @@ public class Ticket extends AuditableEntity {
     private User reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "milestone_id")             // nullable — ticket may not be in a milestone
+    @JoinColumn(name = "milestone_id")
     private Milestone milestone;
 
     @Column(nullable = false)

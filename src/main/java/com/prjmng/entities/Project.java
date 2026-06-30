@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -16,7 +18,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "projects", schema = "project_management")
 public class Project extends AuditableEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -27,7 +28,7 @@ public class Project extends AuditableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;          // ← the project creator/owner
+    private User owner;
 
     @Column(nullable = false)
     private String name;
@@ -39,5 +40,18 @@ public class Project extends AuditableEntity {
 
     private LocalDate startDate;
     private LocalDate endDate;
+
+    @OneToMany(
+        mappedBy = "project",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<ProjectMember> members = new ArrayList<>();
+
+
+    public void addMember(ProjectMember projectMember) {
+        members.add(projectMember);
+        projectMember.setProject(this);
+    }
 }
 

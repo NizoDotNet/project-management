@@ -9,7 +9,7 @@ import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
 import com.prjmng.shared.DTOs.organization.UpdateOrganizationRequest;
 import com.prjmng.shared.DTOs.users.UserResponse;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -25,7 +25,7 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
     public OrganizationResponse createOrganization(CreateOrganizationRequest createOrganizationRequest, UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with this " + userId + " id was not foud"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User with this " + userId + " id was not foud"));
 
         Organization organization = Organization
                 .builder()
@@ -42,10 +42,10 @@ public class OrganizationService {
     }
 
     public OrganizationResponse updateOrganization(UUID organizationId, UpdateOrganizationRequest organizationRequest, UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with this " + userId + " id was not foud"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User with this " + userId + " id was not foud"));
 
         Organization organization = organizationRepository.findByIdAndOwnerId(organizationId, user.getId())
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new EntityNotFoundException(
                                 String.format("Organization with %s id was not found", organizationId)
                         )
                 );
@@ -61,7 +61,7 @@ public class OrganizationService {
 
     public OrganizationResponse getOrganization(UUID id) {
         Organization organization = organizationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new EntityNotFoundException(
                     String.format("Organization with %s id was not found", id)
                 )
             );
@@ -73,7 +73,7 @@ public class OrganizationService {
 
     public OrganizationResponse getOrganization(String slug) {
         Organization organization = organizationRepository.findBySlug(slug)
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new EntityNotFoundException(
                                 String.format("Organization with %s slug was not found", slug)
                         )
                 );
@@ -109,10 +109,10 @@ public class OrganizationService {
     }
 
     public void delete(UUID id, UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with this " + userId + " id was not foud"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User with this " + userId + " id was not foud"));
 
         Organization organization = organizationRepository.findByIdAndOwnerId(id, user.getId())
-                .orElseThrow(() -> new NotFoundException(
+                .orElseThrow(() -> new EntityNotFoundException(
                                 String.format("Organization with %s id was not found", id)
                         )
                 );
