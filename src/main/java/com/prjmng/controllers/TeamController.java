@@ -44,14 +44,17 @@ public class TeamController {
             @RequestParam(defaultValue = "0", required = true) int page,
             @RequestParam(defaultValue = "10", required = true) int pageSize,
             @RequestParam(required = false) UUID orgId,
-            @RequestParam(required = false) String name) {
-        Page<TeamResponse> teams = teamService.getAllWithPagination(PageRequest.of(page, pageSize), orgId, name);
+            @RequestParam(required = false) String name,
+            @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        Page<TeamResponse> teams = teamService.getAllWithPagination(PageRequest.of(page, pageSize), user.getId(), orgId, name);
         return ResponseEntity.ok(teams);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TeamResponse> getById(@PathVariable UUID id) {
-        TeamResponse team = teamService.getById(id);
+    public ResponseEntity<TeamResponse> getById(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        TeamResponse team = teamService.getById(id, user.getId());
         return ResponseEntity.ok(team);
     }
 
@@ -62,7 +65,9 @@ public class TeamController {
     }
 
     @PostMapping("/{id}/members")
-    public ResponseEntity<TeamMemberResponse> addMember(@PathVariable UUID id, @Valid CreateTeamMemberRequest request) {
+    public ResponseEntity<TeamMemberResponse> addMember(@PathVariable UUID id, @Valid CreateTeamMemberRequest request, @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+
         TeamMemberResponse response = teamService.addMember(id, request);
         return ResponseEntity.ok(response);
     }
