@@ -49,7 +49,7 @@ public class TeamService {
         TeamMember member = TeamMember
                 .builder()
                 .userId(user.getId())
-                .Role(TeamMemberRole.OWNER)
+                .role(TeamMemberRole.OWNER)
                 .build();
         team.addMember(member);
 
@@ -96,7 +96,7 @@ public class TeamService {
                 .builder()
                 .userId(request.getUserId())
                 .team(team)
-                .Role(request.getRole())
+                .role(request.getRole())
                 .build();
 
         member = teamMemberRepository.save(member);

@@ -30,6 +30,7 @@ public class TeamMember {
     @Column(name = "user_id")
     private UUID userId;
 
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private TeamMemberRole Role;
+    private TeamMemberRole role;
 }

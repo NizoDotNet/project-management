@@ -67,7 +67,7 @@ public class TeamController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("{temId}/members/{memberId}")
+    @DeleteMapping("{teamId}/members/{memberId}")
     public void removeMember(@PathVariable UUID teamId, @PathVariable UUID memberId, @AuthenticationPrincipal Jwt jwt) {
         User user = userService.getOrCreateUser(jwt);
         teamService.removeMember(teamId, memberId, user.getId());
