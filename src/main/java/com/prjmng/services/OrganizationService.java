@@ -3,6 +3,7 @@ package com.prjmng.services;
 import com.prjmng.entities.Organization;
 import com.prjmng.entities.User;
 import com.prjmng.repositories.OrganizationRepository;
+import com.prjmng.repositories.UserRepository;
 import com.prjmng.services.specifications.OrganizationSpecifications;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
@@ -14,7 +15,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,16 +23,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final UserService userService;
-
-    public OrganizationResponse createOrganization(CreateOrganizationRequest createOrganizationRequest, Jwt jwt) {
-        User user = userService.getOrCreateUser(jwt);
+    private final UserRepository userRepository;
+    public OrganizationResponse createOrganization(CreateOrganizationRequest createOrganizationRequest, UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with this " + userId + " id was not foud"));
 
         Organization organization = Organization
                 .builder()
                 .name(createOrganizationRequest.getName())
                 .slug(generateSlug(createOrganizationRequest.getName()))
-                .ownerId(user.getId())
+                .ownerId(userId)
                 .build();
 
         organization = organizationRepository.save(organization);
@@ -42,8 +41,8 @@ public class OrganizationService {
         return response;
     }
 
-    public OrganizationResponse updateOrganization(UUID organizationId, UpdateOrganizationRequest organizationRequest, Jwt jwt) {
-        User user = userService.getOrCreateUser(jwt);
+    public OrganizationResponse updateOrganization(UUID organizationId, UpdateOrganizationRequest organizationRequest, UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with this " + userId + " id was not foud"));
 
         Organization organization = organizationRepository.findByIdAndOwnerId(organizationId, user.getId())
                 .orElseThrow(() -> new NotFoundException(
@@ -109,8 +108,8 @@ public class OrganizationService {
         return slug;
     }
 
-    public void delete(UUID id, Jwt jwt) {
-        User user = userService.getOrCreateUser(jwt);
+    public void delete(UUID id, UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User with this " + userId + " id was not foud"));
 
         Organization organization = organizationRepository.findByIdAndOwnerId(id, user.getId())
                 .orElseThrow(() -> new NotFoundException(

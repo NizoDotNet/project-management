@@ -1,6 +1,8 @@
 package com.prjmng.controllers;
 
+import com.prjmng.entities.User;
 import com.prjmng.services.TeamService;
+import com.prjmng.services.UserService;
 import com.prjmng.shared.DTOs.teams.CreateTeamMemberRequest;
 import com.prjmng.shared.DTOs.teams.CreateTeamRequest;
 import com.prjmng.shared.DTOs.teams.TeamMemberResponse;
@@ -22,15 +24,23 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TeamController {
     private final TeamService teamService;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<TeamResponse> create(@Valid CreateTeamRequest request, @AuthenticationPrincipal Jwt jwt) {
-        TeamResponse teamResponse = teamService.createTeam(request, jwt);
+        User user = userService.getOrCreateUser(jwt);
+        TeamResponse teamResponse = teamService.createTeam(request, user.getId());
         return ResponseEntity.ok(teamResponse);
     }
 
+    @DeleteMapping("{id}")
+    public void delete(UUID id, @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        teamService.deleteTeam(id, user.getId());
+    }
+
     @GetMapping
-    public ResponseEntity<Page<TeamResponse>> get(
+    public ResponseEntity<Page<TeamResponse>> getAll(
             @RequestParam(defaultValue = "0", required = true) int page,
             @RequestParam(defaultValue = "10", required = true) int pageSize,
             @RequestParam(required = false) UUID orgId,
@@ -55,6 +65,12 @@ public class TeamController {
     public ResponseEntity<TeamMemberResponse> addMember(@PathVariable UUID id, @Valid CreateTeamMemberRequest request) {
         TeamMemberResponse response = teamService.addMember(id, request);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("{temId}/members/{memberId}")
+    public void removeMember(@PathVariable UUID teamId, @PathVariable UUID memberId, @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        teamService.removeMember(teamId, memberId, user.getId());
     }
 }
 

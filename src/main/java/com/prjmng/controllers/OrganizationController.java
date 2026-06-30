@@ -1,6 +1,8 @@
 package com.prjmng.controllers;
 
+import com.prjmng.entities.User;
 import com.prjmng.services.OrganizationService;
+import com.prjmng.services.UserService;
 import com.prjmng.shared.DTOs.organization.CreateOrganizationRequest;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
 import com.prjmng.shared.DTOs.organization.UpdateOrganizationRequest;
@@ -20,24 +22,28 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrganizationController {
     private final OrganizationService organizationService;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<OrganizationResponse> createOrganization(@Valid CreateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {
-        OrganizationResponse response = organizationService.createOrganization(request, jwt);
+        User user = userService.getOrCreateUser(jwt);
+        OrganizationResponse response = organizationService.createOrganization(request, user.getId());
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<OrganizationResponse> updateOrganization(@PathVariable UUID id, @Valid UpdateOrganizationRequest request, @AuthenticationPrincipal Jwt jwt) {
-        OrganizationResponse response = organizationService.updateOrganization(id, request, jwt);
+        User user = userService.getOrCreateUser(jwt);
+        OrganizationResponse response = organizationService.updateOrganization(id, request, user.getId());
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("{id}")
     public void updateOrganization(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
-        organizationService.delete(id, jwt);
+        User user = userService.getOrCreateUser(jwt);
+        organizationService.delete(id, user.getId());
     }
 
 
