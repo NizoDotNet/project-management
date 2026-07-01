@@ -11,12 +11,11 @@ import com.prjmng.repositories.ProjectMemberRepository;
 import com.prjmng.repositories.ProjectRepository;
 import com.prjmng.repositories.UserRepository;
 import com.prjmng.shared.DTOs.organization.OrganizationResponse;
-import com.prjmng.shared.DTOs.projects.CreateProjectRequest;
-import com.prjmng.shared.DTOs.projects.ProjectResponse;
-import com.prjmng.shared.DTOs.projects.UpdateProjectStatusRequest;
+import com.prjmng.shared.DTOs.projects.*;
 import com.prjmng.shared.DTOs.users.UserResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -24,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -73,6 +73,72 @@ public class ProjectService {
         project = projectRepository.save(project);
 
         return mapToResponse(project);
+    }
+
+    public ProjectMemberResponse addMember(UUID id, @Valid CreateProjectMemberRequest request, UUID userId) {
+        Project project = projectRepository.findByIdAndOwnerId(id, userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                                String.format("Project with %s id was not found", id)
+                        )
+                );;
+        boolean isUserAlreadyMember = projectMemberRepository.existsByProjectIdAndUserId(id, request.getUserId());
+        if(isUserAlreadyMember) {
+            throw new RuntimeException("User with id " + request.getUserId() + " is already member");
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                                String.format("User with %s id was not found", request.getUserId())
+                        )
+                );
+
+        ProjectMember projectMember = ProjectMember
+                .builder()
+                .user(user)
+                .project(project)
+                .role(request.getRole())
+                .build();
+        projectMember = projectMemberRepository.save(projectMember);
+        return mapToResponse(projectMember);
+    }
+
+    public void removeMember(UUID projectId, UUID memberId, UUID userId) {
+        boolean canUserRemoveMember = projectMemberRepository
+                .existsByProjectIdAndUserIdAndRoleIn(projectId, userId, List.of(ProjectMemberRole.OWNER, ProjectMemberRole.MANAGER));
+        if(!canUserRemoveMember) {
+            throw new RuntimeException("User with id " + userId + " cannot remove member from project with id " + projectId);
+        }
+        projectMemberRepository.deleteById(memberId);
+    }
+
+    public void setEndDateOfProject(UUID projectId, UUID userId, UpdateProjectEndDateRequest request) {
+        boolean canUserRemoveMember = projectMemberRepository
+                .existsByProjectIdAndUserIdAndRoleIn(projectId, userId, List.of(ProjectMemberRole.OWNER, ProjectMemberRole.MANAGER));
+        if(!canUserRemoveMember) {
+            throw new RuntimeException("User with id " + userId + " cannot set end date in project with id " + projectId);
+        }
+
+        Project project = projectRepository.findByIdAndOwnerId(projectId, userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                                String.format("Project with %s id was not found", projectId)
+                        )
+                );
+
+        if(project.getStartDate().isAfter(request.getEndDate())) {
+            throw new ValidationException("End date cannot be before start date of project");
+        }
+
+        project.setEndDate(request.getEndDate());
+        projectRepository.save(project);
+    }
+
+    private static @NonNull ProjectMemberResponse mapToResponse(ProjectMember projectMember) {
+        return new ProjectMemberResponse(
+                projectMember.getId(),
+                mapToResponse(projectMember.getProject()),
+                new UserResponse(projectMember.getUser().getId(), projectMember.getUser().getKeycloakId(), projectMember.getUser().getEmail(), projectMember.getUser().getFirstName(), projectMember.getUser().getLastName()),
+                projectMember.getRole()
+        );
     }
 
     public void deleteProject(UUID id, UUID userId) {

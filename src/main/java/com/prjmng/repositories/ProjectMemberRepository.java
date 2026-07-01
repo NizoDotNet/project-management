@@ -2,6 +2,7 @@ package com.prjmng.repositories;
 
 import com.prjmng.entities.Project;
 import com.prjmng.entities.ProjectMember;
+import com.prjmng.entities.enums.ProjectMemberRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,5 +21,8 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UU
 
     @EntityGraph(attributePaths = {"project", "project.owner", "project.organization"})
     Optional<ProjectMember> findByProjectIdAndUserId(UUID projectId, UUID userId);
+
+    boolean existsByProjectIdAndUserId(UUID projectId, UUID userId);
+    boolean existsByProjectIdAndUserIdAndRoleIn(UUID projectId, UUID userId, Collection<ProjectMemberRole> role);
 }
 

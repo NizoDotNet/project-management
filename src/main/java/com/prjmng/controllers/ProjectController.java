@@ -3,9 +3,7 @@ package com.prjmng.controllers;
 import com.prjmng.entities.User;
 import com.prjmng.services.ProjectService;
 import com.prjmng.services.UserService;
-import com.prjmng.shared.DTOs.projects.CreateProjectRequest;
-import com.prjmng.shared.DTOs.projects.ProjectResponse;
-import com.prjmng.shared.DTOs.projects.UpdateProjectStatusRequest;
+import com.prjmng.shared.DTOs.projects.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -80,6 +78,39 @@ public class ProjectController {
 
         User user = userService.getOrCreateUser(jwt);
         projectService.updateStatus(id, user.getId(), request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("{id}/enddate")
+    public ResponseEntity<Void> updateEndDate(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateProjectEndDateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        User user = userService.getOrCreateUser(jwt);
+        projectService.setEndDateOfProject(id, user.getId(), request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("{id}/members")
+    public ResponseEntity<ProjectMemberResponse> addMember(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateProjectMemberRequest request,
+            @AuthenticationPrincipal  Jwt jwt
+    ) {
+        User user = userService.getOrCreateUser(jwt);
+        ProjectMemberResponse response = projectService.addMember(id, request, user.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("{id}/members/{memberId}")
+    public ResponseEntity<Void> removeMember(
+            @PathVariable UUID id,
+            @PathVariable UUID memberId,
+            @AuthenticationPrincipal  Jwt jwt
+    ) {
+        User user = userService.getOrCreateUser(jwt);
+        projectService.removeMember(id, memberId, user.getId());
         return ResponseEntity.noContent().build();
     }
 }
