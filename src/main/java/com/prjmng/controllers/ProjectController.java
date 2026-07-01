@@ -92,11 +92,22 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("{id}/members")
+    public ResponseEntity<Page<ProjectMemberResponse>> getAllMembers(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @AuthenticationPrincipal  Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        Page<ProjectMemberResponse> response = projectService.getAllMembersWithPagination(id, user.getId(), PageRequest.of(page, pageSize));
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("{id}/members")
     public ResponseEntity<ProjectMemberResponse> addMember(
             @PathVariable UUID id,
             @Valid @RequestBody CreateProjectMemberRequest request,
-            @AuthenticationPrincipal  Jwt jwt
+            @AuthenticationPrincipal Jwt jwt
     ) {
         User user = userService.getOrCreateUser(jwt);
         ProjectMemberResponse response = projectService.addMember(id, request, user.getId());

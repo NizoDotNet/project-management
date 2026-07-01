@@ -75,6 +75,16 @@ public class ProjectService {
         return mapToResponse(project);
     }
 
+    public Page<ProjectMemberResponse> getAllMembersWithPagination(UUID projectId, UUID userId, PageRequest pageRequest) {
+        boolean isUserMember = projectMemberRepository.existsByProjectIdAndUserId(projectId, userId);
+        if(!isUserMember) {
+            throw new RuntimeException("Non member cannot see project members");
+        }
+
+        Page<ProjectMember> projectMembers = projectMemberRepository.findAllByProjectId(projectId, pageRequest);
+        return projectMembers.map(pm -> mapToResponse(pm));
+    }
+
     public ProjectMemberResponse addMember(UUID id, @Valid CreateProjectMemberRequest request, UUID userId) {
         Project project = projectRepository.findByIdAndOwnerId(id, userId)
                 .orElseThrow(() -> new EntityNotFoundException(
