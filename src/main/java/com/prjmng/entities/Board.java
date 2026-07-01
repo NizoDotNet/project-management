@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Board extends AuditableEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
