@@ -15,6 +15,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,7 +62,7 @@ public class BoardService {
             throw new RuntimeException("User with id " + userId + " is not project member");
         }
 
-        List<BoardColumnResponse> boardColumns = boardColumnRepository.findByBoardId(id)
+        List<BoardColumnResponse> boardColumns = boardColumnRepository.findByBoardIdOrderByPosition(id)
                 .stream()
                 .map(bc -> new BoardColumnResponse(bc.getId(), bc.getName(), bc.getPosition()))
                 .toList();
@@ -68,6 +70,31 @@ public class BoardService {
         BoardWithColumnsResponse response = mapToResponse(board, boardColumns);
 
         return response;
+    }
+
+    public Page<BoardResponse> getByProjectId(UUID projectId, UUID userId, PageRequest pageRequest) {
+        boolean isUserProjectMember = projectMemberRepository.existsByProjectIdAndUserId(projectId, userId);
+
+        if(!isUserProjectMember) {
+            throw new RuntimeException("User with id " + userId + " is not project member");
+        }
+
+        Page<Board> boards = boardRepository.findAllByProjectId(projectId, pageRequest);
+
+        return boards.map(b -> mapToResponse(b));
+    }
+
+    public void deleteBoard(UUID id, UUID userId) {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Board with id " + id + " was not found"));
+
+        boolean isUserProjectMember = projectMemberRepository.existsByProjectIdAndUserIdAndRoleIn(board.getProject().getId(), userId, List.of(ProjectMemberRole.OWNER, ProjectMemberRole.MANAGER));
+
+        if(!isUserProjectMember) {
+            throw new RuntimeException("User with id " + userId + " is not project member");
+        }
+
+        boardRepository.delete(board);
     }
 
     private static @NonNull BoardWithColumnsResponse mapToResponse(Board board, List<BoardColumnResponse> boardColumns) {
