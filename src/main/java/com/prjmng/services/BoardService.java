@@ -1,7 +1,9 @@
 package com.prjmng.services;
 
 import com.prjmng.entities.Board;
+import com.prjmng.entities.BoardColumn;
 import com.prjmng.entities.Project;
+import com.prjmng.entities.enums.BoardType;
 import com.prjmng.entities.enums.ProjectMemberRole;
 import com.prjmng.repositories.BoardColumnRepository;
 import com.prjmng.repositories.BoardRepository;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +51,8 @@ public class BoardService {
                 .name(request.getName())
                 .type(request.getType())
                 .build();
+
+        createDefaultColumns(board);
         board = boardRepository.save(board);
         return mapToResponse(board);
     }
@@ -97,6 +102,24 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
+
+    private void createDefaultColumns(Board board) {
+        List<String> defaults = board.getType() == BoardType.SCRUM
+                ? List.of("Backlog", "To Do", "In Progress", "In Review", "Done")
+                : List.of("Backlog", "In Progress", "Done");
+        if(board.getBoardColumns() == null) {
+            board.setBoardColumns(new ArrayList<>());
+        }
+
+        for(int i = 0; i < defaults.size(); i++) {
+            BoardColumn column = BoardColumn
+                    .builder()
+                    .name(defaults.get(i))
+                    .position(i)
+                    .build();
+            board.addColumn(column);
+        }
+    }
     private static @NonNull BoardWithColumnsResponse mapToResponse(Board board, List<BoardColumnResponse> boardColumns) {
         return new BoardWithColumnsResponse(board.getId(), board.getProject().getId(), board.getName(), boardColumns, board.getType());
     }
