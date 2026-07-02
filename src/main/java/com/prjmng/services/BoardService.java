@@ -9,10 +9,7 @@ import com.prjmng.repositories.BoardColumnRepository;
 import com.prjmng.repositories.BoardRepository;
 import com.prjmng.repositories.ProjectMemberRepository;
 import com.prjmng.repositories.ProjectRepository;
-import com.prjmng.shared.DTOs.boards.BoardColumnResponse;
-import com.prjmng.shared.DTOs.boards.BoardResponse;
-import com.prjmng.shared.DTOs.boards.BoardWithColumnsResponse;
-import com.prjmng.shared.DTOs.boards.CreateBoardRequest;
+import com.prjmng.shared.DTOs.boards.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -102,6 +99,46 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
+    public BoardColumnResponse createBoardColumn(UUID id, @Valid CreateBoardColumnRequest request, UUID userId) {
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Board with id " + id + " was not found"));
+
+        boolean isUserProjectMember = projectMemberRepository.existsByProjectIdAndUserIdAndRoleIn(board.getProject().getId(), userId, List.of(ProjectMemberRole.OWNER, ProjectMemberRole.MANAGER));
+
+        if(!isUserProjectMember) {
+            throw new RuntimeException("User with id " + userId + " is not project member");
+        }
+
+        BoardColumn boardColumn = BoardColumn
+                .builder()
+                .name(request.getName())
+                .board(board)
+                .build();
+
+        boardColumn = boardColumnRepository.save(boardColumn);
+        return new BoardColumnResponse(boardColumn.getId(), boardColumn.getName(), boardColumn.getPosition());
+    }
+
+    public void deleteBoardColumn(UUID boardColumnId, UUID userId) {
+        BoardColumn boardColumn = boardColumnRepository.findById(boardColumnId)
+                .orElseThrow(() -> new EntityNotFoundException("Board column with id " + boardColumnId + " was not found"));
+
+        boolean isUserProjectMember = projectMemberRepository.existsByProjectIdAndUserIdAndRoleIn(
+                        boardColumn.getBoard().getProject().getId(),
+                        userId,
+                        List.of(ProjectMemberRole.OWNER, ProjectMemberRole.MANAGER)
+                );
+
+        if(!isUserProjectMember) {
+            throw new RuntimeException("User with id " + userId + " is not project member");
+        }
+
+        boardColumnRepository.delete(boardColumn);
+    }
+
+    public void updateBoardColumn() {
+
+    }
 
     private void createDefaultColumns(Board board) {
         List<String> defaults = board.getType() == BoardType.SCRUM
