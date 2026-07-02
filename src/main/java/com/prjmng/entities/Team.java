@@ -30,6 +30,7 @@ public class Team extends AuditableEntity {
     @Length(min=2, max=30)
     private String name;
 
+    @Builder.Default
     @OneToMany(
         mappedBy = "team",
         cascade = CascadeType.ALL,

@@ -41,6 +41,7 @@ public class Project extends AuditableEntity {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @Builder.Default
     @OneToMany(
         mappedBy = "project",
         cascade = CascadeType.ALL,

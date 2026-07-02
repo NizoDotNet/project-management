@@ -17,6 +17,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,17 +137,51 @@ public class BoardService {
         boardColumnRepository.delete(boardColumn);
     }
 
-    public void updateBoardColumn() {
+    @Transactional
+    public void updateBoardColumn(UUID boardColumnId, @Valid UpdateBoardColumnRequest request, UUID userId) {
+        BoardColumn boardColumn = boardColumnRepository.findById(boardColumnId)
+                .orElseThrow(() -> new EntityNotFoundException("Board column with id " + boardColumnId + " was not found"));
 
+        Integer newPos = request.getPosition();
+        Integer oldPos = boardColumn.getPosition();
+
+        if(newPos == oldPos) {
+            return;
+        }
+
+        boolean isUserProjectMember = projectMemberRepository.existsByProjectIdAndUserIdAndRoleIn(
+                boardColumn.getBoard().getProject().getId(),
+                userId,
+                List.of(ProjectMemberRole.OWNER, ProjectMemberRole.MANAGER)
+        );
+
+        if(!isUserProjectMember) {
+            throw new RuntimeException("User with id " + userId + " is not project member");
+        }
+
+        boardColumn.setName(request.getName());
+        updatePosition(newPos, oldPos, boardColumn);
+
+        boardColumnRepository.save(boardColumn);
+    }
+
+    private void updatePosition(Integer newPos, Integer oldPos, BoardColumn boardColumn) {
+        if(newPos < oldPos) {
+            boardColumnRepository.incrementPositionsBetween(newPos, oldPos - 1);
+        }
+
+        else {
+            boardColumnRepository.decrementPositionsBetween(oldPos + 1, newPos);
+        }
+
+        boardColumn.setPosition(newPos);
     }
 
     private void createDefaultColumns(Board board) {
         List<String> defaults = board.getType() == BoardType.SCRUM
                 ? List.of("Backlog", "To Do", "In Progress", "In Review", "Done")
                 : List.of("Backlog", "In Progress", "Done");
-        if(board.getBoardColumns() == null) {
-            board.setBoardColumns(new ArrayList<>());
-        }
+
 
         for(int i = 0; i < defaults.size(); i++) {
             BoardColumn column = BoardColumn

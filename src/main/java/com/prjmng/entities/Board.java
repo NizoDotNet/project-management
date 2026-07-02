@@ -31,6 +31,7 @@ public class Board extends AuditableEntity {
     @Column(name = "type", nullable = false)
     private BoardType type;
 
+    @Builder.Default
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardColumn> boardColumns = new ArrayList<>();
 

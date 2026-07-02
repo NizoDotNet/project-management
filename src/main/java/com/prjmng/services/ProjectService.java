@@ -61,7 +61,6 @@ public class ProjectService {
                 .description(createProjectRequest.getDescription())
                 .status(ProjectStatus.PLANNING)
                 .build();
-        project.setMembers(new ArrayList<>());
 
         ProjectMember projectMember = ProjectMember
                 .builder()
