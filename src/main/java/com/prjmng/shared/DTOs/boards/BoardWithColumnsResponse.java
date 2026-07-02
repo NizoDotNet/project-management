@@ -1,9 +1,6 @@
 package com.prjmng.shared.DTOs.boards;
 
-import com.prjmng.entities.Board;
 import com.prjmng.entities.enums.BoardType;
-import com.prjmng.shared.DTOs.projects.ProjectResponse;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,10 +11,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class BoardResponse {
+public class BoardWithColumnsResponse {
     private UUID id;
     private UUID projectId;
     private String name;
+    private List<BoardColumnResponse> columns;
     private BoardType type;
 }
-
