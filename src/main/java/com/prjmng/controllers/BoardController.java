@@ -3,9 +3,7 @@ package com.prjmng.controllers;
 import com.prjmng.entities.User;
 import com.prjmng.services.BoardService;
 import com.prjmng.services.UserService;
-import com.prjmng.shared.DTOs.boards.BoardResponse;
-import com.prjmng.shared.DTOs.boards.BoardWithColumnsResponse;
-import com.prjmng.shared.DTOs.boards.CreateBoardRequest;
+import com.prjmng.shared.DTOs.boards.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -73,4 +71,36 @@ public class BoardController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("{id}/columns")
+    public ResponseEntity<BoardColumnResponse> createColumn(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateBoardColumnRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        BoardColumnResponse response = boardService.createBoardColumn(id, request, user.getId());
+        return  ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("{boardId}/columns/{columnId}")
+    public ResponseEntity<Void> createColumn(
+            @PathVariable UUID boardId,
+            @PathVariable UUID columnId,
+            @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        boardService.deleteBoardColumn(columnId, user.getId());
+        return  ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("{id}/columns/{columnId}")
+    public ResponseEntity<Void> update(
+            @PathVariable UUID id,
+            @PathVariable UUID columnId,
+            @Valid @RequestBody UpdateBoardColumnRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        User user = userService.getOrCreateUser(jwt);
+        boardService.updateBoardColumn(columnId, request, user.getId());
+        return ResponseEntity.noContent().build();
+    }
+
 }

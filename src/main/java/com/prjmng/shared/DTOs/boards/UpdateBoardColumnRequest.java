@@ -13,6 +13,5 @@ public class UpdateBoardColumnRequest {
     @Length(max=100)
     private String name;
     @NotNull
-    @Min(1)
     private Integer position;
 }
